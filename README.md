@@ -241,10 +241,12 @@ claude-for-docs/
 │   │   ├── google/
 │   │   │   ├── token-manager.ts     # Reads/refreshes rclone OAuth token
 │   │   │   ├── drive-api.ts         # Google Drive API v3 (files, comments)
-│   │   │   └── docs-api.ts          # Google Docs API v1 (structured edits)
+│   │   │   ├── docs-api.ts          # Google Docs API v1 (structured edits)
+│   │   │   └── gmail-api.ts         # Gmail API v1 (search, read, send)
 │   │   ├── claude/
 │   │   │   ├── agent.ts             # Claude Agent SDK orchestration
 │   │   │   ├── gdocs-mcp-server.ts  # MCP tools for Google Docs (10 tools)
+│   │   │   ├── gmail-mcp-server.ts  # MCP tools for Gmail (6 tools)
 │   │   │   └── system-prompt.ts     # Context prompt for the agent
 │   │   └── ws/
 │   │       └── handler.ts           # WebSocket message routing
@@ -265,7 +267,9 @@ claude-for-docs/
 
 ## MCP tools (what Claude can do)
 
-The server exposes 10 MCP tools to Claude:
+The server exposes 16 MCP tools to Claude:
+
+### Google Docs
 
 | Tool | Description |
 |------|-------------|
@@ -279,6 +283,32 @@ The server exposes 10 MCP tools to Claude:
 | `insert_text` | Insert text at a specific position |
 | `replace_text` | Find and replace text |
 | `append_text` | Add text to the end of the document |
+
+### Gmail
+
+Requires Gmail scope — see [Gmail setup](#gmail-setup-optional) below.
+
+| Tool | Description |
+|------|-------------|
+| `search_emails` | Search emails using Gmail query syntax (`from:`, `subject:`, `is:unread`, etc.) |
+| `read_email` | Read the full content of an email by ID |
+| `read_thread` | Read an entire email thread (all messages) |
+| `send_email` | Send a new email |
+| `reply_to_email` | Reply to an existing email (keeps it in the same thread) |
+| `create_draft` | Create a draft email without sending |
+
+### Gmail setup (optional)
+
+The Gmail tools reuse your rclone OAuth token. To enable them, you need to re-authorize rclone with Gmail access:
+
+1. Open a terminal and run:
+   ```bash
+   rclone config reconnect gdrive:
+   ```
+2. Your browser opens for Google login — make sure to **grant Gmail access** in addition to Drive
+3. Restart the DocPat server
+
+> **Note:** rclone's OAuth client requests Drive scopes by default. To also get Gmail, you may need to create a custom OAuth client in Google Cloud Console that includes the `https://www.googleapis.com/auth/gmail.modify` scope, then configure rclone with that client ID.
 
 ## Troubleshooting
 

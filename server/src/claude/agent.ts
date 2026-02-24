@@ -1,15 +1,18 @@
 import { query, type Options, type SDKMessage } from '@anthropic-ai/claude-code';
 import { createGDocsMcpServer } from './gdocs-mcp-server.js';
+import { createGmailMcpServer } from './gmail-mcp-server.js';
 import { buildSystemPrompt } from './system-prompt.js';
 import { findSkillOrCommand } from './skills-loader.js';
 import { DriveApi } from '../google/drive-api.js';
 import { DocsApi } from '../google/docs-api.js';
+import { GmailApi } from '../google/gmail-api.js';
 import { TokenManager } from '../google/token-manager.js';
 import { CONFIG } from '../config.js';
 
 const tokenManager = new TokenManager();
 const driveApi = new DriveApi(tokenManager);
 const docsApi = new DocsApi(tokenManager);
+const gmailApi = new GmailApi(tokenManager);
 
 /** Detect if the user message is a skill/command invocation */
 function detectSkill(message: string): string | undefined {
@@ -39,6 +42,7 @@ export async function runAgentQuery(params: AgentQueryParams) {
   const { docId, userMessage, sessionId, abortController, onStream, onToolUse, onToolResult, onDone, onError } = params;
 
   const gdocsMcp = createGDocsMcpServer(driveApi, docsApi);
+  const gmailMcp = createGmailMcpServer(gmailApi);
 
   const options: Options = {
     abortController,
@@ -46,6 +50,7 @@ export async function runAgentQuery(params: AgentQueryParams) {
     appendSystemPrompt: buildSystemPrompt(docId, detectSkill(userMessage)),
     mcpServers: {
       gdocs: gdocsMcp,
+      gmail: gmailMcp,
     },
     allowedTools: [
       'mcp__gdocs__get_doc_content',
@@ -58,6 +63,12 @@ export async function runAgentQuery(params: AgentQueryParams) {
       'mcp__gdocs__insert_text',
       'mcp__gdocs__replace_text',
       'mcp__gdocs__append_text',
+      'mcp__gmail__search_emails',
+      'mcp__gmail__read_email',
+      'mcp__gmail__read_thread',
+      'mcp__gmail__send_email',
+      'mcp__gmail__reply_to_email',
+      'mcp__gmail__create_draft',
       'Read',
       'Glob',
       'Grep',
