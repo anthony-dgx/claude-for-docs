@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Background -->
+  <rect width="128" height="128" rx="24" fill="#7c6ef0"/>
+  <!-- Dog face -->
+  <!-- Head -->
+  <ellipse cx="64" cy="68" rx="32" ry="30" fill="#e8dff5"/>
+  <!-- Ears (floppy) -->
+  <ellipse cx="36" cy="44" rx="14" ry="20" fill="#9b8ec4" transform="rotate(-15 36 44)"/>
+  <ellipse cx="92" cy="44" rx="14" ry="20" fill="#9b8ec4" transform="rotate(15 92 44)"/>
+  <!-- Inner ears -->
+  <ellipse cx="36" cy="46" rx="8" ry="12" fill="#c4b5e3" transform="rotate(-15 36 46)"/>
+  <ellipse cx="92" cy="46" rx="8" ry="12" fill="#c4b5e3" transform="rotate(15 92 46)"/>
+  <!-- Eyes -->
+  <circle cx="50" cy="62" r="6" fill="#2d2a4a"/>
+  <circle cx="78" cy="62" r="6" fill="#2d2a4a"/>
+  <!-- Eye shine -->
+  <circle cx="52" cy="60" r="2" fill="white"/>
+  <circle cx="80" cy="60" r="2" fill="white"/>
+  <!-- Snout -->
+  <ellipse cx="64" cy="78" rx="14" ry="10" fill="#d4c8ed"/>
+  <!-- Nose -->
+  <ellipse cx="64" cy="74" rx="5" ry="3.5" fill="#2d2a4a"/>
+  <!-- Mouth -->
+  <path d="M58 80 Q64 86 70 80" stroke="#2d2a4a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Tongue -->
+  <ellipse cx="64" cy="85" rx="4" ry="5" fill="#f08080"/>
+</svg>

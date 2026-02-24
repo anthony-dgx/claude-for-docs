@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "DocPM",
+  "name": "DocPat",
   "version": "0.1.0",
   "description": "Chat with Claude about your Google Docs — with full PM skills",
   "permissions": [
@@ -31,7 +31,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "Open DocPM"
+    "default_title": "Open DocPat"
   },
   "icons": {
     "16": "icons/icon16.png",

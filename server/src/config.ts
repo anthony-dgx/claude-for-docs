@@ -2,7 +2,7 @@ import { homedir } from 'os';
 import { join } from 'path';
 
 export const CONFIG = {
-  port: parseInt(process.env.DOCPM_PORT || '3456'),
+  port: parseInt(process.env.DOCPAT_PORT || '3456'),
   rcloneConfigPath: join(homedir(), '.config/rclone/rclone.conf'),
   rcloneRemote: 'gdrive',
   personalOsPath: join(homedir(), 'Desktop/Lab/personal_os'),

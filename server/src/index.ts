@@ -64,7 +64,7 @@ const wss = new WebSocketServer({ server: httpServer });
 wss.on('connection', handleConnection);
 
 httpServer.listen(CONFIG.port, () => {
-  console.log(`DocPM server running on http://localhost:${CONFIG.port}`);
+  console.log(`DocPat server running on http://localhost:${CONFIG.port}`);
   console.log(`WebSocket available at ws://localhost:${CONFIG.port}`);
   console.log(`API key: ${process.env.ANTHROPIC_API_KEY ? 'set' : 'NOT SET'}`);
 });
