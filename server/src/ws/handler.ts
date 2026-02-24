@@ -7,6 +7,9 @@ function send(ws: WebSocket, data: Record<string, unknown>) {
   }
 }
 
+// Maps docId to the Claude session ID for conversation continuity
+const docSessions = new Map<string, string>();
+
 export function handleConnection(ws: WebSocket) {
   let currentDocId: string | null = null;
   let abortController: AbortController | null = null;
@@ -48,6 +51,7 @@ export function handleConnection(ws: WebSocket) {
           await runAgentQuery({
             docId,
             userMessage: msg.message,
+            sessionId: docSessions.get(docId),
             abortController,
             onStream: (text) => send(ws, { type: 'stream', text }),
             onToolUse: (toolName, input) => {
@@ -58,8 +62,9 @@ export function handleConnection(ws: WebSocket) {
               send(ws, { type: 'tool_result', toolName, summary });
             },
             onDone: (result) => {
-              console.log(`[ws] done (cost: $${result.cost.toFixed(4)}, turns: ${result.turns})`);
-              send(ws, { type: 'done', ...result });
+              docSessions.set(docId, result.sessionId);
+              console.log(`[ws] done (cost: $${result.cost.toFixed(4)}, turns: ${result.turns}, session: ${result.sessionId})`);
+              send(ws, { type: 'done', cost: result.cost, turns: result.turns, text: result.text });
             },
             onError: (message) => {
               console.error(`[ws] error: ${message}`);

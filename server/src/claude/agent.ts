@@ -26,16 +26,17 @@ function detectSkill(message: string): string | undefined {
 export interface AgentQueryParams {
   docId: string;
   userMessage: string;
+  sessionId?: string;
   abortController: AbortController;
   onStream: (text: string) => void;
   onToolUse: (toolName: string, input: Record<string, unknown>) => void;
   onToolResult: (toolName: string, summary: string) => void;
-  onDone: (result: { text: string; cost: number; turns: number }) => void;
+  onDone: (result: { text: string; cost: number; turns: number; sessionId: string }) => void;
   onError: (message: string) => void;
 }
 
 export async function runAgentQuery(params: AgentQueryParams) {
-  const { docId, userMessage, abortController, onStream, onToolUse, onToolResult, onDone, onError } = params;
+  const { docId, userMessage, sessionId, abortController, onStream, onToolUse, onToolResult, onDone, onError } = params;
 
   const gdocsMcp = createGDocsMcpServer(driveApi, docsApi);
 
@@ -68,6 +69,7 @@ export async function runAgentQuery(params: AgentQueryParams) {
     includePartialMessages: true,
     maxTurns: CONFIG.maxTurns,
     model: CONFIG.model,
+    ...(sessionId ? { resume: sessionId, continue: true } : {}),
   };
 
   try {
@@ -104,6 +106,7 @@ export async function runAgentQuery(params: AgentQueryParams) {
               text: message.result,
               cost: message.total_cost_usd,
               turns: message.num_turns,
+              sessionId: message.session_id,
             });
           } else {
             onError(`Agent stopped: ${message.subtype}`);
