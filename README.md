@@ -32,9 +32,9 @@ Chrome Extension (side panel)     Local Server (localhost:3456)
 
 ### Why rclone?
 
-To call the Google Drive and Docs APIs, you need an OAuth token. Normally, that means registering an OAuth client in Google Cloud Console — but our Workspace admin restricts that, and creating a Chrome extension OAuth client requires the same step.
+To call the Google Drive and Docs APIs, you need an OAuth token. Normally, that means registering an OAuth client in Google Cloud Console — you can go faster by just using rclone.
 
-rclone solves this by shipping its own built-in OAuth client ID (shared by all rclone users). When you run `rclone config`, it handles the entire OAuth flow — browser login, consent, token exchange — and stores the resulting access + refresh tokens locally in `~/.config/rclone/rclone.conf`.
+rclone ships its own built-in OAuth client ID (shared by all rclone users). When you run `rclone config`, it handles the entire OAuth flow — browser login, consent, token exchange — and stores the resulting access + refresh tokens locally in `~/.config/rclone/rclone.conf`.
 
 Our server reads that token file, refreshes it automatically when it expires, and uses it to call Google APIs. No Google Cloud project, no OAuth app registration, no IT approval needed. Each team member just runs `rclone config` once with their own Google account.
 
