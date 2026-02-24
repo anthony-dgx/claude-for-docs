@@ -102,7 +102,7 @@ ANTHROPIC_API_KEY=sk-ant-your-key-here npm run dev
 
 You should see:
 ```
-DocPM server running on http://localhost:3456
+DocPat server running on http://localhost:3456
 WebSocket available at ws://localhost:3456
 API key: set
 ```
@@ -113,12 +113,12 @@ API key: set
 2. Enable **Developer mode** (toggle in the top right)
 3. Click **Load unpacked**
 4. Select the `extension/` folder from this repo
-5. The DocPM icon (purple "D") appears in your toolbar
+5. The DocPat icon (purple dog) appears in your toolbar
 
 ### 6. Use it
 
 1. Open any Google Doc in Chrome
-2. Click the DocPM icon — the side panel opens
+2. Click the DocPat icon — the side panel opens
 3. The doc is auto-detected from the URL. If not, paste the Google Doc URL in the chat
 4. Start chatting! Try:
    - `summarize this doc`
