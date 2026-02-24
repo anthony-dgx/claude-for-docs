@@ -579,7 +579,7 @@ async function init() {
   }
 
   if (!currentDocId) {
-    docTitleEl.textContent = 'Paste a Google Doc URL to start';
+    docTitleEl.textContent = 'No doc — chat or open a Google Doc';
   }
 
   connect();

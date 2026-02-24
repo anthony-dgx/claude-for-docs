@@ -1,11 +1,14 @@
 import { getKnowledge, getSkills, getCommands, findSkillOrCommand, buildSkillContext } from './skills-loader.js';
 
-export function buildSystemPrompt(docId: string, skillName?: string): string {
+export function buildSystemPrompt(docId: string | null, skillName?: string): string {
   let prompt = `
 ## Current Context
 
-You are assisting a Product Manager working on a Google Doc.
-Current document ID: ${docId}
+You are assisting a Product Manager.
+`;
+
+  if (docId) {
+    prompt += `Current document ID: ${docId}
 
 ## Google Docs Tools
 
@@ -20,6 +23,19 @@ You have MCP tools (prefixed with mcp__gdocs__) to interact with this document:
 - insert_text: Insert text at a position
 - replace_text: Find and replace text
 - append_text: Add text at the end
+`;
+  }
+
+  prompt += `
+## Gmail Tools
+
+You have MCP tools (prefixed with mcp__gmail__) to work with emails:
+- search_emails: Search using Gmail query syntax (from:, subject:, is:unread, newer_than:, etc.)
+- read_email: Read the full content of an email
+- read_thread: Read an entire email thread
+- send_email: Send a new email
+- reply_to_email: Reply to an existing email (stays in the same thread)
+- create_draft: Create a draft without sending
 
 ## Knowledge Base
 
@@ -32,9 +48,9 @@ Check these directories when the user asks about existing briefs, team context, 
 
 ## Working Style
 
-- Always read the doc content and comments before making suggestions
+- When a doc is open, read its content and comments before making suggestions
 - When adding comments, be specific about what text you're commenting on
-- Confirm with the user before modifying document content
+- Confirm with the user before modifying document content or sending emails
 - Write in the PM's voice: direct, no fluff, conclusions first
 `;
 

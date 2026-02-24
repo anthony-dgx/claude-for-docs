@@ -34,12 +34,8 @@ export function handleConnection(ws: WebSocket) {
       }
 
       case 'chat': {
-        const docId = msg.docId || currentDocId;
-        if (!docId) {
-          send(ws, { type: 'error', message: 'No document ID. Send init first.' });
-          return;
-        }
-        currentDocId = docId;
+        const docId = msg.docId || currentDocId || null;
+        if (docId) currentDocId = docId;
 
         // Cancel any in-flight query
         abortController?.abort();
@@ -51,7 +47,7 @@ export function handleConnection(ws: WebSocket) {
           await runAgentQuery({
             docId,
             userMessage: msg.message,
-            sessionId: docSessions.get(docId),
+            sessionId: docSessions.get(docId || '__no_doc__'),
             abortController,
             onStream: (text) => send(ws, { type: 'stream', text }),
             onToolUse: (toolName, input) => {
@@ -62,7 +58,7 @@ export function handleConnection(ws: WebSocket) {
               send(ws, { type: 'tool_result', toolName, summary });
             },
             onDone: (result) => {
-              docSessions.set(docId, result.sessionId);
+              docSessions.set(docId || '__no_doc__', result.sessionId);
               console.log(`[ws] done (cost: $${result.cost.toFixed(4)}, turns: ${result.turns}, session: ${result.sessionId})`);
               send(ws, { type: 'done', cost: result.cost, turns: result.turns, text: result.text });
             },

@@ -27,7 +27,7 @@ function detectSkill(message: string): string | undefined {
 }
 
 export interface AgentQueryParams {
-  docId: string;
+  docId: string | null;
   userMessage: string;
   sessionId?: string;
   abortController: AbortController;
