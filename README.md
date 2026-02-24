@@ -94,34 +94,95 @@ npm install
 > /Users/$USER/.nvm/versions/node/$(node -v)/bin/npm install
 > ```
 
-### 4. Configure DocPat (optional)
+### 4. Add your own skills (optional)
 
-Create `~/.docpat.json` to customize paths:
+DocPat can load custom slash commands and skills from your local filesystem. This is how you get `/write-brief`, `/release-note`, `/competitive`, and all the other PM skills — they're just markdown files in a folder.
+
+**Create `~/.docpat.json`** in your home directory:
 
 ```json
 {
   "skillsPaths": [
-    "~/my-skills",
-    "/absolute/path/to/team-skills"
+    "~/my-docpat-skills"
   ]
 }
 ```
 
-Each skills directory should follow this structure:
+You can list multiple directories — DocPat merges them all. For example, your personal skills plus a shared team folder:
+
+```json
+{
+  "skillsPaths": [
+    "~/my-docpat-skills",
+    "/path/to/team-shared-skills"
+  ]
+}
+```
+
+**Already using Claude Code PM skills?** Point directly to your plugin cache:
+
+```json
+{
+  "skillsPaths": [
+    "~/.claude/plugins/cache/pm-skills/pm/692a95be0025"
+  ]
+}
+```
+
+#### Skills directory structure
+
+Each path in `skillsPaths` should follow this layout:
 
 ```
-my-skills/
-├── commands/          # Slash commands (e.g. /summarize.md)
-├── skills/            # Multi-file skills (each in a folder with SKILL.md)
-│   └── write-brief/
-│       ├── SKILL.md
-│       └── references/
-└── knowledge/         # Context files loaded into every conversation
+my-docpat-skills/
+├── commands/                # Slash commands — one .md file each
+│   ├── summarize.md         # → /summarize
+│   ├── write-brief.md       # → /write-brief
+│   └── release-note.md      # → /release-note
+│
+├── skills/                  # Multi-file skills — each in its own folder
+│   └── competitive-analysis/
+│       ├── SKILL.md          # Main skill prompt (required)
+│       └── references/       # Supporting files loaded with the skill
+│           ├── template.md
+│           └── examples.sql
+│
+└── knowledge/               # Context files injected into every conversation
     └── domain/
         └── glossary.md
 ```
 
-You can also set `DOCPAT_SKILLS_PATH` as a comma-separated env var instead.
+**Commands** are simple: one markdown file per slash command. The filename becomes the command name.
+
+**Skills** are richer: each gets a folder with a `SKILL.md` and optional `references/` directory for templates, examples, or data files.
+
+**Knowledge** files are always included as background context — useful for domain glossaries, team conventions, or product specs.
+
+#### Writing a command
+
+A command file is a markdown file with optional YAML frontmatter:
+
+```markdown
+---
+description: Write a product brief from the document
+---
+
+Read the current document and write a structured product brief with:
+- Problem statement
+- User stories
+- Requirements (P0/P1/P2)
+- Success metrics
+```
+
+The `description` appears in the `/` menu in the side panel. The body is sent to Claude as the prompt.
+
+#### Alternative: env var
+
+You can also set `DOCPAT_SKILLS_PATH` as a comma-separated environment variable:
+
+```bash
+DOCPAT_SKILLS_PATH=~/my-skills,/team/skills npm run dev
+```
 
 ### 5. Start the server
 
@@ -156,20 +217,18 @@ API key: set
    - `add a comment on the "Executive Summary" section suggesting we add metrics`
 5. Type `/` to see available PM skills
 
-## Available skills
+## Built-in skills
+
+These four commands are always available, even without any skills directory configured:
 
 | Command | Description |
 |---------|-------------|
 | `/summarize` | Summarize the doc and open comments |
 | `/comments` | Analyze and group all open comments |
-| `/write-brief` | Write a product brief from the doc |
-| `/polish` | Suggest clarity and conciseness improvements |
-| `/stakeholder-update` | Draft a stakeholder update email |
 | `/reply-comments` | Draft replies to all open comments |
-| `/competitive` | Create a competitive analysis brief |
-| `/roadmap` | Extract and prioritize roadmap items |
-| `/release-note` | Write a customer-facing release note |
-| `/research` | Synthesize research insights |
+| `/polish` | Suggest clarity and conciseness improvements |
+
+Any additional skills you add via `~/.docpat.json` will show up alongside these when you type `/` in the chat.
 
 ## Project structure
 
