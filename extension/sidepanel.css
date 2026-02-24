@@ -147,6 +147,14 @@ header h1 {
   min-width: 0;
 }
 
+.session-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
 .session-badge {
   font-size: 10px;
   color: var(--text-muted);
@@ -157,11 +165,55 @@ header h1 {
   flex-shrink: 0;
 }
 
+.session-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.session-item:hover .session-close { opacity: 1; }
+
+.session-close:hover {
+  color: var(--red);
+}
+
 .sessions-empty {
   padding: 12px;
   font-size: 11px;
   color: var(--text-muted);
   text-align: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.icon-btn:hover {
+  color: var(--text);
+  background: var(--bg-hover);
 }
 
 .status {

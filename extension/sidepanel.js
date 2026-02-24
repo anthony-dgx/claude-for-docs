@@ -114,6 +114,30 @@ function switchToDoc(docId, title) {
   }
 }
 
+// ── Clear chat / Close session ──
+
+function clearChat() {
+  messagesEl.innerHTML = '';
+  totalCost = 0;
+  costEl.textContent = '';
+  currentStreamEl = null;
+  currentStreamText = '';
+  if (currentDocId && sessions[currentDocId]) {
+    sessions[currentDocId].messages = [];
+    sessions[currentDocId].cost = 0;
+    saveSessions();
+  }
+}
+
+function closeSession(docId) {
+  delete sessions[docId];
+  saveSessions();
+  // If we just closed the active session, clear the chat
+  if (docId === currentDocId) {
+    clearChat();
+  }
+}
+
 // ── Tab change handler (from background.js) ──
 
 chrome.runtime.onMessage.addListener((message) => {
@@ -150,17 +174,40 @@ function openSessionsDropdown() {
       const msgCount = s.messages.length;
       const isActive = docId === currentDocId;
       return `<div class="session-item${isActive ? ' active' : ''}" data-doc-id="${docId}">
-        <span class="session-title">${escapeHtml(s.title || docId)}</span>
-        <span class="session-badge">${msgCount}</span>
+        <div class="session-info">
+          <span class="session-title">${escapeHtml(s.title || docId)}</span>
+          <span class="session-badge">${msgCount}</span>
+        </div>
+        <button class="session-close" data-close-id="${docId}" title="Close session">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <line x1="2" y1="2" x2="10" y2="10"></line>
+            <line x1="10" y1="2" x2="2" y2="10"></line>
+          </svg>
+        </button>
       </div>`;
     }).join('');
 
     sessionsDropdownEl.querySelectorAll('.session-item').forEach((el) => {
-      el.addEventListener('click', () => {
+      el.addEventListener('click', (e) => {
+        // Don't switch if clicking the close button
+        if (e.target.closest('.session-close')) return;
         const docId = el.dataset.docId;
         const s = sessions[docId];
         switchToDoc(docId, s?.title);
         closeSessionsDropdown();
+      });
+    });
+
+    sessionsDropdownEl.querySelectorAll('.session-close').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeSession(btn.dataset.closeId);
+        // Re-render the dropdown
+        if (Object.keys(sessions).length === 0) {
+          closeSessionsDropdown();
+        } else {
+          openSessionsDropdown();
+        }
       });
     });
   }
@@ -191,6 +238,9 @@ document.addEventListener('click', (e) => {
     closeSessionsDropdown();
   }
 });
+
+// Clear chat button
+document.getElementById('clear-btn').addEventListener('click', clearChat);
 
 // ── WebSocket ──
 
