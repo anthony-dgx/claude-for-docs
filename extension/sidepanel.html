@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocPM</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header id="header">
+    <div class="header-left">
+      <h1>DocPM</h1>
+      <span id="doc-title" class="doc-title"></span>
+    </div>
+    <div id="status" class="status status-disconnected" title="Disconnected"></div>
+  </header>
+
+  <main id="messages" class="messages"></main>
+
+  <div id="tool-indicator" class="tool-indicator hidden"></div>
+
+  <footer>
+    <div id="skills-menu" class="skills-menu hidden"></div>
+    <div class="input-wrapper">
+      <textarea
+        id="input"
+        placeholder="Ask about this doc... (type / for skills)"
+        rows="1"
+        autofocus
+      ></textarea>
+      <button id="send-btn" title="Send (Enter)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+    <div id="cost" class="cost"></div>
+  </footer>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>
