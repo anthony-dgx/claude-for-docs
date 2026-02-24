@@ -173,25 +173,48 @@ function renderMarkdown(text) {
 
 // ── Skills ──
 
-const SKILLS = [
-  { cmd: '/summarize', label: 'Summarize doc', desc: 'Summarize the document content and open comments', prompt: 'Read this document and give me a concise summary. Then list the open comments with who said what.' },
-  { cmd: '/comments', label: 'Analyze comments', desc: 'List and analyze all open comments', prompt: 'List all open comments on this document. Group them by theme and highlight any that need my response.' },
-  { cmd: '/write-brief', label: 'Write brief', desc: 'Write a product brief from this document', prompt: 'Read this document and write a structured product brief based on its content. Include problem statement, user stories, requirements, and success metrics.' },
-  { cmd: '/polish', label: 'Polish writing', desc: 'Rewrite for clarity and conciseness', prompt: 'Read this document and suggest improvements for clarity and conciseness. Be specific about which sections to change and how.' },
-  { cmd: '/stakeholder-update', label: 'Stakeholder update', desc: 'Draft a stakeholder update from this doc', prompt: 'Read this document and draft a concise stakeholder update email based on its content. Include key decisions, progress, and next steps.' },
-  { cmd: '/reply-comments', label: 'Draft replies', desc: 'Draft replies to all open comments', prompt: 'Read the document and all open comments. Draft thoughtful replies to each comment that needs a response from me.' },
-  { cmd: '/competitive', label: 'Competitive analysis', desc: 'Create a competitive brief', prompt: 'Read this document and create a competitive analysis brief based on its content. Include feature comparisons and strategic implications.' },
-  { cmd: '/roadmap', label: 'Roadmap update', desc: 'Extract roadmap items from this doc', prompt: 'Read this document and extract potential roadmap items. Prioritize them using RICE scoring and suggest a Now/Next/Later breakdown.' },
-  { cmd: '/release-note', label: 'Release note', desc: 'Write a customer-facing release note', prompt: 'Read this document and write a concise, customer-facing release note based on its content.' },
-  { cmd: '/research', label: 'Synthesize research', desc: 'Synthesize research insights from this doc', prompt: 'Read this document and synthesize the research findings into structured insights. Identify key themes, user needs, and opportunity areas.' },
+// Built-in quick actions (always available)
+const BUILTIN_SKILLS = [
+  { cmd: '/summarize', desc: 'Summarize the document content and open comments' },
+  { cmd: '/comments', desc: 'List and analyze all open comments' },
+  { cmd: '/reply-comments', desc: 'Draft replies to all open comments' },
+  { cmd: '/polish', desc: 'Rewrite for clarity and conciseness' },
 ];
+
+// Skills loaded from server (populated on init)
+let serverSkills = [];
+
+// All skills combined
+let SKILLS = [];
+
+async function loadSkillsFromServer() {
+  try {
+    const resp = await fetch('http://localhost:3456/skills');
+    if (resp.ok) {
+      serverSkills = await resp.json();
+      // Merge: built-in first, then server skills (commands then skills)
+      const serverItems = serverSkills.map(s => ({
+        cmd: s.name.startsWith('/') ? s.name : `/${s.name}`,
+        desc: s.description,
+      }));
+      // Deduplicate: server skills override built-ins with the same name
+      const serverCmds = new Set(serverItems.map(s => s.cmd));
+      const uniqueBuiltins = BUILTIN_SKILLS.filter(s => !serverCmds.has(s.cmd));
+      SKILLS = [...uniqueBuiltins, ...serverItems];
+      console.log(`Loaded ${serverSkills.length} skills from server`);
+    }
+  } catch {
+    // Server not available, use built-ins only
+    SKILLS = [...BUILTIN_SKILLS];
+  }
+}
 
 const skillsMenuEl = document.getElementById('skills-menu');
 let activeSkillIndex = -1;
 
 function showSkillsMenu(filter = '') {
   const filtered = SKILLS.filter(s =>
-    s.cmd.includes(filter.toLowerCase()) || s.label.toLowerCase().includes(filter.toLowerCase())
+    s.cmd.includes(filter.toLowerCase()) || s.desc.toLowerCase().includes(filter.toLowerCase())
   );
 
   if (filtered.length === 0) {
@@ -231,7 +254,8 @@ function highlightSkill() {
 }
 
 function selectSkill(skill) {
-  inputEl.value = skill.prompt;
+  // Insert the command name — the server will load the full skill context
+  inputEl.value = `${skill.cmd} `;
   hideSkillsMenu();
   autoResize();
   inputEl.focus();
@@ -300,7 +324,7 @@ inputEl.addEventListener('keydown', (e) => {
       e.preventDefault();
       const filter = inputEl.value.slice(1).toLowerCase();
       const filtered = SKILLS.filter(s =>
-        s.cmd.includes(filter) || s.label.toLowerCase().includes(filter)
+        s.cmd.includes(filter) || s.desc.toLowerCase().includes(filter)
       );
       if (filtered[activeSkillIndex]) {
         selectSkill(filtered[activeSkillIndex]);
@@ -340,6 +364,10 @@ function autoResize() {
 // ── Init ──
 
 async function init() {
+  // Load real skills from server
+  SKILLS = [...BUILTIN_SKILLS]; // start with built-ins
+  loadSkillsFromServer(); // async, will update SKILLS when ready
+
   // Try 1: ask background for cached doc info
   chrome.runtime.sendMessage({ type: 'GET_CURRENT_DOC' }, (doc) => {
     if (doc && doc.docId) {

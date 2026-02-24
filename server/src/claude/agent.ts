@@ -1,6 +1,7 @@
 import { query, type Options, type SDKMessage } from '@anthropic-ai/claude-code';
 import { createGDocsMcpServer } from './gdocs-mcp-server.js';
 import { buildSystemPrompt } from './system-prompt.js';
+import { findSkillOrCommand } from './skills-loader.js';
 import { DriveApi } from '../google/drive-api.js';
 import { DocsApi } from '../google/docs-api.js';
 import { TokenManager } from '../google/token-manager.js';
@@ -9,6 +10,18 @@ import { CONFIG } from '../config.js';
 const tokenManager = new TokenManager();
 const driveApi = new DriveApi(tokenManager);
 const docsApi = new DocsApi(tokenManager);
+
+/** Detect if the user message is a skill/command invocation */
+function detectSkill(message: string): string | undefined {
+  // Match messages that start with a skill prompt (from the extension's skill selection)
+  // or explicit /command invocations
+  const match = message.match(/^\/([a-z][-a-z]*)/);
+  if (match) {
+    const skill = findSkillOrCommand(match[1]);
+    if (skill) return skill.name;
+  }
+  return undefined;
+}
 
 export interface AgentQueryParams {
   docId: string;
@@ -29,7 +42,7 @@ export async function runAgentQuery(params: AgentQueryParams) {
   const options: Options = {
     abortController,
     cwd: CONFIG.personalOsPath,
-    appendSystemPrompt: buildSystemPrompt(docId),
+    appendSystemPrompt: buildSystemPrompt(docId, detectSkill(userMessage)),
     mcpServers: {
       gdocs: gdocsMcp,
     },
