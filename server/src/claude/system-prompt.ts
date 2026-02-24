@@ -1,5 +1,7 @@
-export function buildSystemPrompt(docId: string): string {
-  return `
+import { getKnowledge, getSkills, getCommands, findSkillOrCommand, buildSkillContext } from './skills-loader.js';
+
+export function buildSystemPrompt(docId: string, skillName?: string): string {
+  let prompt = `
 ## Current Context
 
 You are assisting a Product Manager working on a Google Doc.
@@ -35,4 +37,34 @@ Check these directories when the user asks about existing briefs, team context, 
 - Confirm with the user before modifying document content
 - Write in the PM's voice: direct, no fluff, conclusions first
 `;
+
+  // Inject the PM knowledge base (style guide, priorities, etc.)
+  const knowledge = getKnowledge();
+  if (knowledge) {
+    prompt += `\n\n---\n\n# PM Knowledge Base\n\n${knowledge}`;
+  }
+
+  // List available skills so Claude knows what it can do
+  const commands = getCommands();
+  const skills = getSkills();
+  if (commands.length > 0 || skills.length > 0) {
+    prompt += '\n\n---\n\n# Available PM Skills\n\n';
+    prompt += 'The user may invoke these by name. When they do, follow the skill instructions precisely.\n\n';
+    for (const cmd of commands) {
+      prompt += `- **${cmd.name}**: ${cmd.description}\n`;
+    }
+    for (const skill of skills) {
+      prompt += `- **${skill.name}**: ${skill.description}\n`;
+    }
+  }
+
+  // If a specific skill/command was invoked, inject its full context
+  if (skillName) {
+    const skill = findSkillOrCommand(skillName);
+    if (skill) {
+      prompt += `\n\n---\n\n# Active Skill\n\n${buildSkillContext(skill)}`;
+    }
+  }
+
+  return prompt;
 }

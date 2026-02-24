@@ -2,6 +2,7 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import { handleConnection } from './ws/handler.js';
 import { TokenManager } from './google/token-manager.js';
+import { getAllSkillDefs } from './claude/skills-loader.js';
 import { CONFIG } from './config.js';
 
 const httpServer = createServer((req, res) => {
@@ -41,6 +42,17 @@ const httpServer = createServer((req, res) => {
         driveScope: scope,
       }),
     );
+    return;
+  }
+
+  if (req.url === '/skills') {
+    const skills = getAllSkillDefs().map((s) => ({
+      name: s.name,
+      description: s.description,
+      type: s.type,
+    }));
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(skills));
     return;
   }
 
