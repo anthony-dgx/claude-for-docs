@@ -94,7 +94,36 @@ npm install
 > /Users/$USER/.nvm/versions/node/$(node -v)/bin/npm install
 > ```
 
-### 4. Start the server
+### 4. Configure DocPat (optional)
+
+Create `~/.docpat.json` to customize paths:
+
+```json
+{
+  "skillsPaths": [
+    "~/my-skills",
+    "/absolute/path/to/team-skills"
+  ]
+}
+```
+
+Each skills directory should follow this structure:
+
+```
+my-skills/
+├── commands/          # Slash commands (e.g. /summarize.md)
+├── skills/            # Multi-file skills (each in a folder with SKILL.md)
+│   └── write-brief/
+│       ├── SKILL.md
+│       └── references/
+└── knowledge/         # Context files loaded into every conversation
+    └── domain/
+        └── glossary.md
+```
+
+You can also set `DOCPAT_SKILLS_PATH` as a comma-separated env var instead.
+
+### 5. Start the server
 
 ```bash
 ANTHROPIC_API_KEY=sk-ant-your-key-here npm run dev
@@ -107,7 +136,7 @@ WebSocket available at ws://localhost:3456
 API key: set
 ```
 
-### 5. Load the Chrome extension
+### 6. Load the Chrome extension
 
 1. Open `chrome://extensions` in Chrome
 2. Enable **Developer mode** (toggle in the top right)
@@ -115,7 +144,7 @@ API key: set
 4. Select the `extension/` folder from this repo
 5. The DocPat icon (purple dog) appears in your toolbar
 
-### 6. Use it
+### 7. Use it
 
 1. Open any Google Doc in Chrome
 2. Click the DocPat icon — the side panel opens

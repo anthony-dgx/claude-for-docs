@@ -67,4 +67,10 @@ httpServer.listen(CONFIG.port, () => {
   console.log(`DocPat server running on http://localhost:${CONFIG.port}`);
   console.log(`WebSocket available at ws://localhost:${CONFIG.port}`);
   console.log(`API key: ${process.env.ANTHROPIC_API_KEY ? 'set' : 'NOT SET'}`);
+  const skills = getAllSkillDefs();
+  if (CONFIG.skillsPaths.length > 0) {
+    console.log(`Skills: ${skills.length} loaded from ${CONFIG.skillsPaths.join(', ')}`);
+  } else {
+    console.log('Skills: none configured (create ~/.docpat.json to add skills)');
+  }
 });

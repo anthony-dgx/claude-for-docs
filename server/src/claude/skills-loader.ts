@@ -38,8 +38,8 @@ function loadReferences(dir: string): Array<{ name: string; content: string }> {
     }));
 }
 
-function loadCommands(): SkillDef[] {
-  const commandsDir = join(CONFIG.pmSkillsPath, 'commands');
+function loadCommandsFromDir(basePath: string): SkillDef[] {
+  const commandsDir = join(basePath, 'commands');
   if (!existsSync(commandsDir)) return [];
 
   return readdirSync(commandsDir)
@@ -57,8 +57,8 @@ function loadCommands(): SkillDef[] {
     });
 }
 
-function loadSkills(): SkillDef[] {
-  const skillsDir = join(CONFIG.pmSkillsPath, 'skills');
+function loadSkillsFromDir(basePath: string): SkillDef[] {
+  const skillsDir = join(basePath, 'skills');
   if (!existsSync(skillsDir)) return [];
 
   return readdirSync(skillsDir)
@@ -80,8 +80,8 @@ function loadSkills(): SkillDef[] {
     });
 }
 
-function loadKnowledge(): string {
-  const knowledgeDir = join(CONFIG.pmSkillsPath, 'knowledge');
+function loadKnowledgeFromDir(basePath: string): string {
+  const knowledgeDir = join(basePath, 'knowledge');
   if (!existsSync(knowledgeDir)) return '';
 
   const sections: string[] = [];
@@ -93,6 +93,43 @@ function loadKnowledge(): string {
       const content = readFileSync(join(catDir, file), 'utf-8');
       sections.push(`## ${category}/${file}\n\n${content}`);
     }
+  }
+  return sections.join('\n\n---\n\n');
+}
+
+function loadCommands(): SkillDef[] {
+  const seen = new Set<string>();
+  const results: SkillDef[] = [];
+  for (const dir of CONFIG.skillsPaths) {
+    for (const cmd of loadCommandsFromDir(dir)) {
+      if (!seen.has(cmd.name)) {
+        seen.add(cmd.name);
+        results.push(cmd);
+      }
+    }
+  }
+  return results;
+}
+
+function loadSkills(): SkillDef[] {
+  const seen = new Set<string>();
+  const results: SkillDef[] = [];
+  for (const dir of CONFIG.skillsPaths) {
+    for (const skill of loadSkillsFromDir(dir)) {
+      if (!seen.has(skill.name)) {
+        seen.add(skill.name);
+        results.push(skill);
+      }
+    }
+  }
+  return results;
+}
+
+function loadKnowledge(): string {
+  const sections: string[] = [];
+  for (const dir of CONFIG.skillsPaths) {
+    const k = loadKnowledgeFromDir(dir);
+    if (k) sections.push(k);
   }
   return sections.join('\n\n---\n\n');
 }
