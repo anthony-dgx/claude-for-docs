@@ -5,6 +5,10 @@ import { readFileSync, existsSync } from 'fs';
 interface UserConfig {
   skillsPaths?: string[];
   personalOsPath?: string;
+  oauth?: {
+    clientId?: string;
+    clientSecret?: string;
+  };
 }
 
 function loadUserConfig(): UserConfig {
@@ -46,6 +50,10 @@ export const CONFIG = {
       : userConfig.personalOsPath)
     : join(homedir(), 'Desktop/Lab/personal_os'),
   skillsPaths: resolveSkillsPaths(),
+  oauth: {
+    clientId: userConfig.oauth?.clientId || '',
+    clientSecret: userConfig.oauth?.clientSecret || '',
+  },
   model: 'claude-sonnet-4-6' as const,
   maxBudgetUsd: 1.0,
   maxTurns: 20,

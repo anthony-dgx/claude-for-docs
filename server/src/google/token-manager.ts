@@ -4,6 +4,24 @@ import { CONFIG } from '../config.js';
 // Rclone's built-in OAuth client credentials (public, hardcoded in rclone source)
 const RCLONE_CLIENT_ID = '202264815644.apps.googleusercontent.com';
 const RCLONE_CLIENT_SECRET = 'X4Z3ca8xfWDb1Voo-F9a7ZxJ';
+
+// Custom OAuth client from ~/.docpat.json (needed for Gmail scope)
+function loadCustomOAuth(): { clientId: string; clientSecret: string } | null {
+  try {
+    const { readFileSync, existsSync } = require('fs');
+    const { join } = require('path');
+    const { homedir } = require('os');
+    const configPath = join(homedir(), '.docpat.json');
+    if (!existsSync(configPath)) return null;
+    const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+    if (config.oauth?.clientId && config.oauth?.clientSecret) {
+      return { clientId: config.oauth.clientId, clientSecret: config.oauth.clientSecret };
+    }
+  } catch {}
+  return null;
+}
+
+const customOAuth = loadCustomOAuth();
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 const EXPIRY_BUFFER_MS = 5 * 60 * 1000; // refresh 5 min before expiry
 
@@ -82,8 +100,8 @@ export class TokenManager {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        client_id: RCLONE_CLIENT_ID,
-        client_secret: RCLONE_CLIENT_SECRET,
+        client_id: customOAuth?.clientId || RCLONE_CLIENT_ID,
+        client_secret: customOAuth?.clientSecret || RCLONE_CLIENT_SECRET,
         refresh_token: this.token.refresh_token,
         grant_type: 'refresh_token',
       }),
